@@ -39,7 +39,7 @@ class WeaviateConfig:
 @dataclass
 class GeminiConfig:
     """Configuration for Google Gemini API (used for embeddings)."""
-    api_key: str = os.getenv("GEMINI_API_KEY", "AIzaSyByz9QB9i9tqyR8IRIMqmiZ4eJ7_e5MVAA")
+    api_key: str = os.getenv("GEMINI_API_KEY", "")
     embedding_model: str = "models/text-embedding-004"
 
 
@@ -48,7 +48,7 @@ class OpenRouterConfig:
     """Configuration for OpenRouter API (used for LLM)."""
     api_key: str = os.getenv(
         "OPENROUTER_API_KEY",
-        "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"
+        ""
     )
     base_url: str = "https://openrouter.ai/api/v1"
     model: str = "xiaomi/mimo-v2-flash:free"
