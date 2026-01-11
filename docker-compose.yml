@@ -1,0 +1,93 @@
+# Docker Compose for Weaviate
+# ============================
+# This file defines how to run Weaviate locally using Docker
+
+version: '3.8'
+
+services:
+  weaviate:
+    # ============================================
+    # DOCKER CONCEPT: image
+    # ============================================
+    # Instead of installing Weaviate manually, we use a
+    # pre-built Docker image from Weaviate's registry.
+    image: cr.weaviate.io/semitechnologies/weaviate:1.27.2
+
+    ports:
+      # ============================================
+      # DOCKER CONCEPT: Port Mapping
+      # ============================================
+      # Format: "host_port:container_port"
+      # This means: "Connect localhost:8080 to container's port 8080"
+      - "8080:8080" # HTTP API
+      - "50051:50051" # gRPC (faster queries)
+
+    volumes:
+      # ============================================
+      # DOCKER CONCEPT: Volumes (Persistence)
+      # ============================================
+      # Docker containers are ephemeral - when you stop them,
+      # data is lost! Volumes persist data to your disk.
+      #
+      # Format: "./local_folder:/container_folder"
+      - ./weaviate_data:/var/lib/weaviate
+
+    restart: unless-stopped
+
+    environment:
+      # ============================================
+      # WEAVIATE CONFIGURATION
+      # ============================================
+
+      # CRITICAL: Single-node cluster configuration
+      # Without these, Weaviate tries to join a non-existent cluster!
+      CLUSTER_HOSTNAME: 'node1'
+      CLUSTER_GOSSIP_BIND_PORT: '7100'
+      CLUSTER_DATA_BIND_PORT: '7101'
+
+      # Where to store data
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+
+      # What modules to load
+      # We're NOT using Weaviate's built-in vectorizers
+      # because we create embeddings with Gemini ourselves!
+      ENABLE_MODULES: ''
+
+      # Use all available CPUs
+      LIMIT_RESOURCES: 'false'
+
+      # Disable telemetry (optional, for privacy)
+      DISABLE_TELEMETRY: 'true'
+
+      # Default vectorizer (none, since we provide our own)
+      DEFAULT_VECTORIZER_MODULE: 'none'
+
+      # Allow anonymous access (for local development)
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+
+      # Query settings
+      QUERY_DEFAULTS_LIMIT: '25'
+      QUERY_MAXIMUM_RESULTS: '10000'
+
+# ============================================
+# HOW TO USE THIS FILE
+# ============================================
+#
+# 1. Make sure Docker is installed and running
+#
+# 2. Start Weaviate:
+#    docker compose up -d
+#
+#    -d means "detached" (run in background)
+#
+# 3. Check if it's running:
+#    docker compose ps
+#
+# 4. View logs:
+#    docker compose logs -f weaviate
+#
+# 5. Stop Weaviate:
+#    docker compose down
+#
+# 6. Stop and DELETE all data:
+#    docker compose down -v
